@@ -4,10 +4,11 @@ Provides Born-Open capabilities to jsPsych through the use of a simple plugin an
 
 See Cousineau, D. (2021, August 10). Born-Open Data for jsPsych. Retrieved from psyarxiv.com/rkhng
 
-doi: [https://doi.org/10.31234/osf.io/rkhng](10.31234/osf.io/rkhng)
+doi: [10.31234/osf.io/rkhng](https://doi.org/10.31234/osf.io/rkhng)
 
 Follow [this link](https://psyarxiv.com/rkhng) for the text.
 
 This is a beta version. Open an issue  here or contact me for comments/bug reports.
 
 Denis.
+  
