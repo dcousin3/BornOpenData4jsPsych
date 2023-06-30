@@ -2,7 +2,11 @@
     //save data for  the pair subject/session in the experiment folder
     //status:   0 == done;
     //         -1 == No post (throw an error)
+    // version 30.06.2023: two changes
+    //      a) Added trim() to fgets as encoding of end-of-lines was not consistent...
+    //      b) Added a secret file containing the github sshkey. CHANGE TO YOUR SECRET FILE...
     require './_mailfunctions.php';
+    $secretfile = "/_mySecretFile.txt";  // the slash for the subdirectory
 
 
     // The server shell running PHP may be missing environment variable $HOME.
@@ -50,7 +54,7 @@
             $h   = fopen("./" . $Expe . "/_invitations.txt","r"); 
             $fle = "";
             while(!feof($h)){
-                $b       = fgets($h);
+                $b       = trim(fgets($h));
                 if (!feof($h)) {
                     $oneline = preg_split("/[\s,]+/", $b, NULL , PREG_SPLIT_NO_EMPTY);
                     if (count($oneline)>=4) {
@@ -82,15 +86,20 @@
             $h=fopen("./" . $Expe . "/_owner.txt","r");
             $b="#empty";
             while((substr($b,0,1) == "#")){
-                $b=fgets($h);
+                $b=trim(fgets($h));
             }
             $ownername = str_replace("\r\n", "", $b);         //owner's name: the machine
-            $ownermail = str_replace("\r\n", "", fgets($h));  //owner's email
-            $gituser   = str_replace("\r\n", "", fgets($h));
-            $gitrepo   = str_replace("\r\n", "", fgets($h));
+            $ownermail = str_replace("\r\n", "", trim(fgets($h)) );  //owner's email
+            $gituser   = str_replace("\r\n", "", trim(fgets($h)) );
+            $gitrepo   = str_replace("\r\n", "", trim(fgets($h)) );
             fclose($h);
 
-            // GIT-related commands add, commit and push
+            // grab ssh secret passkey; change the file name to preserve privacy.
+            $h=fopen("./" . $Expe . $secretfile, "r");
+            $ssh=trim(fgets($h));
+            fclose($h);
+
+            // GIT-related commands clone, add, commit and push
             //check git presence: version 1.8.3.1 is on the tqmp server
             $cmd="git --version";
             exec($cmd. ' 2>&1', $output, $return_var);
@@ -98,11 +107,11 @@
                 unset($output);
 
                 chdir("./".$Expe);
-                $cmd= "git clone git@github.com:" . $gituser."/" . $gitrepo .".git";
+                $cmd= "git clone https://ghp_".$ssh."@github.com/" . $gituser."/" . $gitrepo .".git";
                 exec($cmd . ' 2>&1', $output, $return_var);
                 if ($return_var != 0) {
-                    file_put_contents("../_333.txt", exec("whoami") ."\n".$output);
-                } else{//clone worked
+                    file_put_contents("../_ERROR-ON-CLONE.txt", exec("whoami") ."\n".$output);
+                } else {//clone worked
                     chdir("./".$Expe);
                     //var_dump(getcwd());
 
@@ -125,7 +134,8 @@
                     exec($cmd.' 2>&1', $output, $return_var);
                     //var_dump($output);
 
-                    $cmd="git push";
+                    // $cmd="git push";
+                    $cmd="git push https://ghp_".$ssh."@github.com/" .$gituser."/". $gitrepo. ".git";
                     exec($cmd.' 2>&1', $output, $return_var);
                     //var_dump($output);
 

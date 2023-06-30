@@ -6,10 +6,13 @@
     //          3 == session already done for that subject; 
     //         -1 == No post (throw an error)
 
+    //require './_mailfunctions.php';  // used for debugging...
 
     try{
         //Limit the domains allowed to access this script for security reasons
+        //There cannot be two Access-Control-Allow-Origin!
         //header('Access-Control-Allow-Origin: https://uottawa.ca1.qualtrics.com');
+        //header('Access-Control-Allow-Origin: https://www.tqmp.org'); 
         header('Access-Control-Allow-Origin: *');
         //Default response
         header('Content-Type: application/json');
@@ -36,16 +39,26 @@
             if (is_dir("./" . $Expe)) {
                 $h=fopen("./" . $Expe . "/_invitations.txt","r"); 
                 while(!feof($h) and !(($subject == $Subj) and ($session == $Sess ))){
-                    $b=fgets($h);
-                    if (substr($b,1,1) != "#") { //Skip comments begining with #
-                        if (!feof($h)) {
+                    $b=trim(fgets($h));
+                    if (!feof($h)) {
+                        if ((substr($b,0,1) != "#") and (substr($b,0,1) != "#")) { //Skip comments begining with #
                             $oneline = preg_split("/[\s,]+/", $b, NULL , PREG_SPLIT_NO_EMPTY);
                             $subject = $oneline[0];
                             $session = $oneline[1];
                             $ran     = $oneline[2];
-                        }
+                        } 
                     }
                 }
+
+            // SEND AN EMAIL in trying to debug...
+            //mymail0attachment(
+            //    "ya quoi au début", "denis.cousineau@uottawa.ca",       //participant's email;
+            //    "denis.cousineau@uottawa.ca", "editorialoffice@tqmp.org", //owner's name and fake email
+            //    "",                                     //cc
+            //    $b . '<>' .substr($b,0,1). "<>". implode("<->", $oneline)
+            //);
+
+
                 if (feof($h)) {
                     $Response = "Subject/Session unknown...";
                     $Status   = 2;

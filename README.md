@@ -1,14 +1,25 @@
 # BornOpenData4jsPsych
 
-Provides Born-Open capabilities to jsPsych through the use of a simple plugin and a function.
+Proved Born-Open capabilities to jsPsych through the use of a simple plugin and a function.
 
-See Cousineau, D. (2021, August 10). Born-Open Data for jsPsych. Retrieved from psyarxiv.com/rkhng
+It contains 
+- ServerSideFiles: The PHP scripts that are to be installed on the server. This script verifies the invitations and 
+    when data are sent, keeps a copy locally on the server and git add them to a GitHub server account found in the owner file.
+- jsPsychFiles: The plugin for jsPsych version 6
+- jsPsychFiles7: The plugin for jsPsych version 7.
 
-doi: [10.31234/osf.io/rkhng](https://doi.org/10.31234/osf.io/rkhng)
+The zip file testExperiment.zip contains the full script for a BornOpen experiment. Place it on any server.
+
+## How to cite
+
+See Denis Cousineau (2021) Born-Open Data for jsPsych. PsyArXiv. https://doi.org/10.31234/osf.io/rkhng
 
 Follow [this link](https://psyarxiv.com/rkhng) for the text.
 
-This is a beta version. Open an issue  here or contact me for comments/bug reports.
+## You see a bug?
 
-Denis.
-  
+This is a beta version. Open an issue here or contact me for comments/bug reports.
+
+## Note
+
+This text is not meant to be published in a journal. The only version is the present psyarXiv article.

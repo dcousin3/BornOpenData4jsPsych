@@ -1,0 +1,37 @@
+    .BornOpen4jsPsychfieldset {
+        border:1px solid gray;
+        width:30em;
+    }
+    .BornOpen4jsPsychformlegend {
+        padding: 0.2em 0.5em; 
+        color: gray;
+        font-size: 90%;
+        position: relative;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .BornOpen4jsPsychformlabel{
+        font-family:candara;
+        font-size:12pt;
+        display: inline-block;
+        text-align:right;
+        width:15em;
+    }
+    .BornOpen4jsPsychformlegend{
+        font-family:candara;
+        font-size:14pt;                
+    }
+    .BornOpen4jsPsychforminput{
+        font-family:candara;
+        font-size:12pt;
+        display: inline-block;
+        width:12em;
+        margin:0 0.5em 0.5em 0;
+    }
+    .BornOpen4jsPsychformbutton{
+        font-family:candara;
+        font-size:12pt;
+        display: inline-block;
+        width:12em;
+        margin:0 0.5em 0.5em 0.2em;
+    }
