@@ -9,6 +9,8 @@
  *
  **/
 
+console.log( "BornOpen4jsPsych version 1.1" );
+
 var jsPsychBornOpen4jsPsychInitialize = (function(jspsych){
     "use strict";
 
@@ -161,7 +163,6 @@ var jsPsychBornOpen4jsPsychInitialize = (function(jspsych){
             }
         }
         setTimeout( ifresult, 500);
-
     }
 
 
