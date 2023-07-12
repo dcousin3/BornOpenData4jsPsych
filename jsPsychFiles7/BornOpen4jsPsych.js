@@ -71,13 +71,19 @@ var jsPsychBornOpen4jsPsychInitialize = (function(jspsych){
 
             if ((trial.subject)&&(trial.session)) {
                 // if both Subject and Session are defined, skip form
-                checkExperimentSubjectSession(trial.experiment, trial.subject, trial.session)
+                checkExperimentSubjectSession(trial.experiment, trial.subject, trial.session);
+                // requires arrow function expression not to overload "this":
+                const done = () => { this.jsPsych.finishTrial(); };
                 // after a while, check the result; go straigth to next event if ok
                 function ifdone() {
-                    if (BornOpen4jsPsychStatus == 0) {
-                        this.jsPsych.finishTrial()
-                    } else {
+                    if (BornOpen4jsPsychStatus == -1) {
                         setTimeout( ifdone, 500);
+                    } else {
+                        if (BornOpen4jsPsychStatus == 0) {
+                            done();
+                        } else {
+                            alert( BornOpen4jsPsychOutput + "\nPress ESC or F12 to quit full screen mode and retry..." );
+                        }
                     }
                 }
                 setTimeout( ifdone, 500);
@@ -111,7 +117,7 @@ var jsPsychBornOpen4jsPsychInitialize = (function(jspsych){
                     </fieldset>
                 </form>
                 <button disabled Id="continue" class="BornOpen4jsPsychformbutton" >${trial.texts[4]}</button>
-                `;  //this.jsPsych.finishTrial()
+                `;  
                 var new_html = '<div id="BornOpen4jsPsychInitialize">'+form+'</div>';
                 // draw
                 display_element.innerHTML = new_html;
@@ -139,7 +145,7 @@ var jsPsychBornOpen4jsPsychInitialize = (function(jspsych){
     var BornOpen4jsPsychSubject;
     var BornOpen4jsPsychSession;
     var BornOpen4jsPsychServer;
-    var BornOpen4jsPsychStatus;
+    var BornOpen4jsPsychStatus = -1; //not yet obtained
     var BornOpen4jsPsychOutput;
 
     /////////////////////////////////////////////////////////////////////////////////////
