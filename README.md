@@ -12,7 +12,7 @@ The zip file testExperiment.zip contains the full script for a BornOpen experime
 
 ## 2023 update
 
-It is not possible to have wildcards in the invitation file. For example, participants ??? could be allowed to run the experiment, where ? matches any characters. Other wildcards are @  (any letter), % (any digit) and ? (any letter or digit).
+It is now possible to have wildcards in the invitation file. For example, participants ??? could be allowed to run the experiment, where ? matches any characters. Other wildcards are @  (any letter), % (any digit) and ? (any letter or digit).
 
 ## How to cite
 
