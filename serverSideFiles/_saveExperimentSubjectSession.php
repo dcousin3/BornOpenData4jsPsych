@@ -6,8 +6,8 @@
     //      a) Added trim() to fgets as encoding of end-of-lines was not consistent...
     //      b) Added a secret file containing the github sshkey. CHANGE TO YOUR SECRET FILE...
     require './_mailfunctions.php';
-    $secretfile = "/_mySecretFile.txt";  // the slash for the subdirectory
-
+    $secretfile = "/_xHeCNf.txt";  // the slash for the subdirectory; contains the ssh key
+    $eol = "\n"; 
 
     // The server shell running PHP may be missing environment variable $HOME.
     // Yet, git is relying strongly on this variable, so if missing, it needs
@@ -22,7 +22,6 @@
         header('Access-Control-Allow-Origin: *');
         //Default response
         header('Content-Type: application/json');
-//        header('Content-Type: text/html');
         // prevent XSS attacks
         $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
@@ -39,6 +38,7 @@
             $Expe = $_POST['experiment'];
             $Data = $_POST['data'];
 
+
             // save file
             $Data = str_replace("&#34;","", $Data);   //remove hidden spaces
             $Data = str_replace("WMWMW",'"', $Data);  //restore "" as delimiters where commas
@@ -50,38 +50,69 @@
             }
             file_put_contents("./".$Expe."/".$Expe."-".$Subj."-".$Sess. $rerun .".csv", $Data);
 
+
             // Replace 'once' with 'done' in the invitations; or decrease nber of sessions
             $h   = fopen("./" . $Expe . "/_invitations.txt","r"); 
             $fle = "";
+            $wildcards = false;
+            $foundsubj = false;
+            
             while(!feof($h)){
-                $b       = trim(fgets($h));
+                $b       = trim(fgets($h)) . $eol ;
+                $newb    = "";
+
                 if (!feof($h)) {
-                    $oneline = preg_split("/[\s,]+/", $b, NULL , PREG_SPLIT_NO_EMPTY);
-                    if (count($oneline)>=4) {
-                        if (($oneline[0] == $Subj) and ($oneline[1] == $Sess )) {
+                    if (! $foundsubj ) {
+                        $oneline = preg_split("/[\s,]+/", $b, NULL , PREG_SPLIT_NO_EMPTY);
+                        if (count($oneline)>=4) {
+                            $subject = $oneline[0];
+                            $session = $oneline[1];
                             $ran     = $oneline[2];
                             $email   = $oneline[3];
-                            if ($ran != "inf") {
-                                if ($ran == "once") $newran = "done";
-                                if (intval($ran) == 1) $newran = "done";
-                                if (intval($ran) > 1) $newran = strval(intval($ran)-1);
 
-                                $p0 = strpos($b, $oneline[0]);
-                                $p1 = strpos($b, $oneline[1], $p0+strlen($oneline[0]) );
-                                $p2 = strpos($b, $oneline[2], $p1+strlen($oneline[1]) );
-                                $newb = substr($b, 0, $p2) . $newran . substr($b, $p2+strlen($oneline[2])) ;
-                                $b = $newb;
+                            // processing the wild cards
+                            if ($subject == '*') { $wildcards = true; $subject = $Subj; };
+                            if ( preg_match( "/[%+@+\?+]/", $subject )== 1) {
+                                $str1 =  preg_replace("/%/", "\d", $subject);
+                                $str1 =  preg_replace("/@/", "[a-zA-Z]", $str1 );
+                                $str1 =  preg_replace("/\?/", "[a-zA-Z0-9]", $str1 );
+                                if ( preg_match( "/\b".$str1."\b/", $Subj)==1 ) {
+                                    $subject = $Subj;
+                                    $wildcards = true;
+                                }
                             }
-                        }
-                    }
-                    $fle = $fle . $b;
-                }   
+
+                            // if participant found, update its line
+                            if (($subject == $Subj) and ($session == $Sess )) {
+                                $foundsubj = true;
+
+                                if ($ran == "inf")     $newran = "inf";
+                                if ($ran == "once")    $newran = "done";
+                                if (intval($ran) == 1) $newran = "done";
+                                if (intval($ran) > 1)  $newran = strval(intval($ran)-1);
+                                //substitute in b the newran; to keep formatting and comments if any
+                                $p0 = strpos($b, $oneline[0]);
+                                $p1 = strpos($b, $oneline[1],    $p0+strlen($oneline[0]) );
+                                $p2 = strpos($b, $oneline[2],    $p1+strlen($oneline[1]) );
+
+                                $newb = strpos($b,0, $p0) . $subject . substr($b, $p0+strlen($oneline[0]), $p2-$p0-strlen($oneline[0])) . $newran . substr($b, $p2+strlen($ran), -1) . ($wildcards ? "     (matching wildcards ".$oneline[0].")":"") . $eol;
+
+                                // the new line replace the old line
+                                if ( ! $wildcards ) { $b = ""; }
+                            }
+
+
+                        } // end of if (count() >= 4)
+                    } // end of if not found
+
+                    $fle = $fle . $newb . $b ;
+
+                } // enf of if !eof
             }
             fclose($h);
-            if ($ran != "inf") {
-                file_put_contents("./" . $Expe . "/_invitations.txt", $fle);
-            }
+            file_put_contents("./" . $Expe . "/_invitations.txt", $fle);
 
+ 
             // grab owner.txt information
             $h=fopen("./" . $Expe . "/_owner.txt","r");
             $b="#empty";
@@ -93,14 +124,15 @@
             $gituser   = str_replace("\r\n", "", trim(fgets($h)) );
             $gitrepo   = str_replace("\r\n", "", trim(fgets($h)) );
             fclose($h);
-
+    
             // grab ssh secret passkey; change the file name to preserve privacy.
             $h=fopen("./" . $Expe . $secretfile, "r");
             $ssh=trim(fgets($h));
             fclose($h);
 
-            // GIT-related commands clone, add, commit and push
-            //check git presence: version 1.8.3.1 is on the tqmp server
+
+            // GIT-related commands add, commit and push
+            //check git presence: version 1.8.3.1 is on the server
             $cmd="git --version";
             exec($cmd. ' 2>&1', $output, $return_var);
             if ($return_var == 0) {
@@ -115,9 +147,8 @@
                     chdir("./".$Expe);
                     //var_dump(getcwd());
 
-
                     // put data in folder rawdata
-                    file_put_contents("rawdata/".$Expe."-".$Subj."-".$Sess. $rerun . ".csv", $Data);
+                    file_put_contents("./rawdata/".$Expe."-".$Subj."-".$Sess. $rerun . ".csv", $Data);
                     // append to subjectsLog.txt:
                     if (file_exists("subjectsLog.txt") ) {
                         $fp = fopen('subjectsLog.txt', 'a');
@@ -127,7 +158,7 @@
 
                     $cmd="git add subjectsLog.txt";
                     exec($cmd.' 2>&1', $output, $return_var);
-                    $cmd="git add rawdata/".$Expe."-".$Subj."-".$Sess.$rerun.".csv";
+                    $cmd="git add ./rawdata/".$Expe."-".$Subj."-".$Sess.$rerun.".csv";
                     exec($cmd.' 2>&1', $output, $return_var);
 
                     $cmd = 'git commit --message="BornOpen4jsPsych uploaded SUBJECT='.$Subj.', SESSION='.$Sess. (($rerun !='') ? ', RERUN='.$rerun :'').'"';
@@ -155,8 +186,8 @@
                 $ownername, "editorialoffice@tqmp.org", // to owner'name & email
                 "",                                     // cc
                 $email_body, 
-                "./".$Expe."/".$Expe."-".$Subj."-".$Sess. $rerun.".csv", 
-                $Expe."-".$Subj."-".$Sess. $rerun.".csv", "csv"  
+                "./".$Expe."/".$Expe."-".$Subj."-".$Sess.$rerun.".csv", 
+                $Expe."-".$Subj."-".$Sess. $rerun.".csv", "csv"
             );
 
             // SEND AN EMAIL TO USER

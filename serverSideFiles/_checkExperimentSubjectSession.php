@@ -43,20 +43,25 @@
                     if (!feof($h)) {
                         if ((substr($b,0,1) != "#") and (substr($b,0,1) != "#")) { //Skip comments begining with #
                             $oneline = preg_split("/[\s,]+/", $b, NULL , PREG_SPLIT_NO_EMPTY);
-                            $subject = $oneline[0];
-                            $session = $oneline[1];
-                            $ran     = $oneline[2];
-                        } 
-                    }
-                }
+                            if ( sizeof($oneline) >= 4 ) {
+                                $subject = $oneline[0];
+                                $session = $oneline[1];
+                                $ran     = $oneline[2];
 
-            // SEND AN EMAIL in trying to debug...
-            //mymail0attachment(
-            //    "ya quoi au début", "denis.cousineau@uottawa.ca",       //participant's email;
-            //    "denis.cousineau@uottawa.ca", "editorialoffice@tqmp.org", //owner's name and fake email
-            //    "",                                     //cc
-            //    $b . '<>' .substr($b,0,1). "<>". implode("<->", $oneline)
-            //);
+                                // processing the wild cards
+                                if ($subject == '*') { $subject = $Subj; };
+                                if ( preg_match( "/[%+@+\?+]/", $subject )== 1) {
+                                    $str1 =  preg_replace("/%/", "\d", $subject);
+                                    $str1 =  preg_replace("/@/", "[a-zA-Z]", $str1 );
+                                    $str1 =  preg_replace("/\?/", "[a-zA-Z0-9]", $str1 );
+                                    if ( preg_match( "/\b".$str1."\b/", $Subj)==1 ) {
+                                        $subject = $Subj;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } // end of while
 
 
                 if (feof($h)) {
