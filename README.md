@@ -10,6 +10,10 @@ It contains
 
 The zip file testExperiment.zip contains the full script for a BornOpen experiment. Place it on any server.
 
+## 2023 update
+
+It is not possible to have wildcards in the invitation file. For example, participants ??? could be allowed to run the experiment, where ? matches any characters. Other wildcards are @  (any letter), % (any digit) and ? (any letter or digit).
+
 ## How to cite
 
 See Denis Cousineau (2021) Born-Open Data for jsPsych. PsyArXiv. https://doi.org/10.31234/osf.io/rkhng
